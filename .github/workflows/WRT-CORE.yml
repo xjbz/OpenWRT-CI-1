@@ -40,7 +40,7 @@ on:
       WRT_TEST:
         required: false
         type: string
-      WRT_PKG_FILE:
+      WRT_PKG_FILE_NAME:
         required: false
         type: string
 
@@ -57,7 +57,7 @@ env:
   WRT_BRANCH: ${{inputs.WRT_BRANCH}}
   WRT_PACKAGE: ${{inputs.WRT_PACKAGE}}
   WRT_TEST: ${{inputs.WRT_TEST}}
-  WRT_PKG_FILE: ${{inputs.WRT_PKG_FILE}}
+  WRT_PKG_FILE_NAME: ${{inputs.WRT_PKG_FILE_NAME}}
 
 jobs:
   core:
@@ -164,9 +164,9 @@ jobs:
         run: |
           cd ./wrt/
 
-          PKG_FILE="${WRT_PKG_FILE:GENERAL.txt}"
+          PKG_FILE="${WRT_PKG_FILE_NAME:GENERAL}"
 
-          cat $GITHUB_WORKSPACE/Config/$WRT_CONFIG.txt $GITHUB_WORKSPACE/Config/$PKG_FILE >> .config
+          cat $GITHUB_WORKSPACE/Config/$WRT_CONFIG.txt $GITHUB_WORKSPACE/Config/${PKG_FILE}.txt >> .config
 
           $GITHUB_WORKSPACE/Scripts/Settings.sh
 
