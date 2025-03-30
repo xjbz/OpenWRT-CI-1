@@ -179,7 +179,7 @@ jobs:
 
           # make download -j$(nproc)
           # make download -j$(nproc) || make -j1 V=sc
-          make -j1 V=sc
+          make download -j1 V=sc
 
       - name: Compile Firmware
         if: env.WRT_TEST != 'true'
