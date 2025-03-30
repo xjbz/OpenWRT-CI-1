@@ -177,7 +177,9 @@ jobs:
         run: |
           cd ./wrt/
 
-          make download -j$(nproc)
+          # make download -j$(nproc)
+          # make download -j$(nproc) || make -j1 V=sc
+          make -j1 V=sc
 
       - name: Compile Firmware
         if: env.WRT_TEST != 'true'
@@ -185,8 +187,7 @@ jobs:
           cd ./wrt/
 
           # make -j$(nproc) || make -j$(nproc) V=s
-          # make -j$(nproc) || make -j1 || make -j1 V=s
-          make -j1 V=s
+          make -j$(nproc) || make -j1 || make -j1 V=sc
 
       - name: Machine Information
         run: |
