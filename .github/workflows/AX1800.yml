@@ -38,7 +38,7 @@ jobs:
       matrix:
         CONFIG: [IPQ60XX-AX1800-WIFI-YES]
         SOURCE: ["${{ github.event.inputs.SOURCE_CODE_REPO || 'LiBwrt/openwrt-6.x' }}"]
-        BRANCH: [kernel-6.12]
+        BRANCH: [main]
 
     #调用公用编译核心WRT-CORE.yml
     uses: ./.github/workflows/WRT-CORE.yml
