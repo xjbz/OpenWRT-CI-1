@@ -19,6 +19,10 @@ on:
         description: '分支名称。'
         required: false
         type: string
+      COMMIT:
+        description: 'commit名称。'
+        required: false
+        type: string
       PACKAGE:
         description: '手动调整插件包，多个请用\n符号隔开。'
         required: false
@@ -71,4 +75,7 @@ jobs:
       WRT_PACKAGE: ${{inputs.PACKAGE}}
       #仅输出配置文件
       WRT_TEST: ${{inputs.TEST}}
+      #使用其他的包列表
       WRT_PKG_FILE_NAME: GENERAL-AX1800
+      #使用其他commit
+      WRT_COMMIT: ${{inputs.COMMIT}}
