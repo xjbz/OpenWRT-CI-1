@@ -43,6 +43,9 @@ on:
       WRT_PKG_FILE_NAME:
         required: false
         type: string
+      WRT_COMMIT:
+        required: false
+        type: string
 
 env:
   GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
@@ -58,6 +61,7 @@ env:
   WRT_PACKAGE: ${{inputs.WRT_PACKAGE}}
   WRT_TEST: ${{inputs.WRT_TEST}}
   WRT_PKG_FILE_NAME: ${{inputs.WRT_PKG_FILE_NAME}}
+  WRT_COMMIT: ${{inputs.WRT_COMMIT}}
 
 jobs:
   core:
@@ -98,8 +102,17 @@ jobs:
         run: |
           git clone --depth=1 --single-branch --branch $WRT_BRANCH $WRT_REPO ./wrt/
 
-          cd ./wrt/ && echo "WRT_HASH=$(git log -1 --pretty=format:'%h')" >> $GITHUB_ENV
+          # cd ./wrt/ && echo "WRT_HASH=$(git log -1 --pretty=format:'%h')" >> $GITHUB_ENV
+          cd ./wrt
+          if [ -n "${{ env.WRT_COMMIT }}" ]; then
+            # Fetch the specific commit you want
+            git fetch origin ${{ env.WRT_COMMIT }}
 
+            # Checkout the commit
+            git checkout ${{ env.WRT_COMMIT }}
+          fi
+          echo "WRT_HASH=$(git log -1 --pretty=format:'%h')" >> $GITHUB_ENV
+  
           # GitHub Action 移除国内下载源
           PROJECT_MIRRORS_FILE="./scripts/projectsmirrors.json"
           if [ -f "$PROJECT_MIRRORS_FILE" ]; then
