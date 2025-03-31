@@ -100,15 +100,12 @@ jobs:
 
       - name: Clone Code
         run: |
-          git clone --depth=1 --single-branch --branch $WRT_BRANCH $WRT_REPO ./wrt/
+          # git clone --depth=1 --single-branch --branch $WRT_BRANCH $WRT_REPO ./wrt/
+          git clone --single-branch --branch $WRT_BRANCH $WRT_REPO ./wrt/
 
           # cd ./wrt/ && echo "WRT_HASH=$(git log -1 --pretty=format:'%h')" >> $GITHUB_ENV
           cd ./wrt
           if [ -n "${{ env.WRT_COMMIT }}" ]; then
-            # Fetch the specific commit you want
-            git fetch origin ${{ env.WRT_COMMIT }}
-
-            # Checkout the commit
             git checkout ${{ env.WRT_COMMIT }}
           fi
           echo "WRT_HASH=$(git log -1 --pretty=format:'%h')" >> $GITHUB_ENV
