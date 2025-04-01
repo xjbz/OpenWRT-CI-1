@@ -8,7 +8,7 @@ on:
         required: true
         type: string
       WRT_THEME:
-        required: true
+        required: false
         type: string
       WRT_NAME:
         required: true
