@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #修改默认主题
-if [[ -n $WRT_THEME ]]
+if [[ -n $WRT_THEME ]]; then
 	sed -i "s/luci-theme-bootstrap/luci-theme-$WRT_THEME/g" $(find ./feeds/luci/collections/ -type f -name "Makefile")
 	echo "CONFIG_PACKAGE_luci-theme-$WRT_THEME=y" >> ./.config
 	echo "CONFIG_PACKAGE_luci-app-$WRT_THEME-config=y" >> ./.config
