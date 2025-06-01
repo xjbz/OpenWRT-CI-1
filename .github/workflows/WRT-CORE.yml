@@ -32,7 +32,7 @@ on:
         required: true
         type: string
       WRT_SOURCE:
-        required: false
+        required: true
         type: string
       WRT_PACKAGE:
         required: false
@@ -58,6 +58,7 @@ env:
   WRT_PW: ${{inputs.WRT_PW}}
   WRT_REPO: ${{inputs.WRT_REPO}}
   WRT_BRANCH: ${{inputs.WRT_BRANCH}}
+  WRT_SOURCE: ${{inputs.WRT_SOURCE}}
   WRT_PACKAGE: ${{inputs.WRT_PACKAGE}}
   WRT_TEST: ${{inputs.WRT_TEST}}
   WRT_PKG_FILE_NAME: ${{inputs.WRT_PKG_FILE_NAME}}
@@ -66,7 +67,7 @@ env:
 jobs:
   core:
     name: ${{inputs.WRT_SOURCE}}
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout Projects
         uses: actions/checkout@main
@@ -75,6 +76,7 @@ jobs:
         env:
           DEBIAN_FRONTEND: noninteractive
         run: |
+          sudo -E apt -yqq purge firefox
           sudo -E apt -yqq update
           sudo -E apt -yqq full-upgrade
           sudo -E apt -yqq autoremove --purge
@@ -91,10 +93,10 @@ jobs:
 
       - name: Initialization Values
         run: |
-          echo "WRT_DATE=$(TZ=UTC-8 date +"%y.%m.%d_%H.%M.%S")" >> $GITHUB_ENV
-          echo "WRT_MARK=$(echo $GITHUB_REPOSITORY | cut -d '/' -f 1)" >> $GITHUB_ENV
-          echo "WRT_VER=$(echo $WRT_REPO | cut -d '/' -f 5-)-$WRT_BRANCH" >> $GITHUB_ENV
-          echo "WRT_TARGET=$(grep -m 1 -oP '^CONFIG_TARGET_\K[\w]+(?=\=y)' ./Config/$WRT_CONFIG.txt | tr '[:lower:]' '[:upper:]')" >> $GITHUB_ENV
+          echo "WRT_DATE=$(TZ=UTC-8 date +"%y.%m.%d-%H.%M.%S")" >> $GITHUB_ENV
+          echo "WRT_MARK=${GITHUB_REPOSITORY%%/*}" >> $GITHUB_ENV
+          echo "WRT_INFO=${WRT_SOURCE%%/*}" >> $GITHUB_ENV
+          echo "WRT_TARGET=$(grep -m 1 -oP '^CONFIG_TARGET_\K[\w]+(?=\=y)' ./Config/$WRT_CONFIG.txt)" >> $GITHUB_ENV
           echo "WRT_KVER=none" >> $GITHUB_ENV
           echo "WRT_LIST=none" >> $GITHUB_ENV
 
@@ -125,8 +127,8 @@ jobs:
         if: env.WRT_TEST != 'true'
         uses: actions/cache@main
         with:
-          key: ${{env.WRT_CONFIG}}-${{env.WRT_VER}}-${{env.WRT_HASH}}
-          restore-keys: ${{env.WRT_CONFIG}}-${{env.WRT_VER}}
+          key: ${{env.WRT_CONFIG}}-${{env.WRT_INFO}}-${{env.WRT_HASH}}
+          restore-keys: ${{env.WRT_CONFIG}}-${{env.WRT_INFO}}
           path: |
             ./wrt/.ccache
             ./wrt/staging_dir/host*
@@ -148,7 +150,7 @@ jobs:
           fi
 
           if ${{steps.check-cache.outputs.cache-hit != 'true'}}; then
-            CACHE_LIST=$(gh cache list --key "$WRT_CONFIG-$WRT_VER" | cut -f 1)
+            CACHE_LIST=$(gh cache list --key "$WRT_CONFIG-$WRT_INFO" | cut -f 1)
             for CACHE_KEY in $CACHE_LIST; do
               gh cache delete $CACHE_KEY
             done
@@ -175,8 +177,11 @@ jobs:
           cd ./wrt/
 
           PKG_FILE="${WRT_PKG_FILE_NAME:GENERAL}"
-
-          cat $GITHUB_WORKSPACE/Config/$WRT_CONFIG.txt $GITHUB_WORKSPACE/Config/${PKG_FILE}.txt >> .config
+          if [[ "${WRT_CONFIG,,}" == *"test"* ]]; then
+            cat $GITHUB_WORKSPACE/Config/$WRT_CONFIG.txt >> .config
+          else
+            cat $GITHUB_WORKSPACE/Config/$WRT_CONFIG.txt $GITHUB_WORKSPACE/Config/${PKG_FILE}.txt >> .config
+          fi
 
           $GITHUB_WORKSPACE/Scripts/Settings.sh
 
@@ -215,7 +220,7 @@ jobs:
         run: |
           cd ./wrt/ && mkdir ./upload/
 
-          cp -f ./.config ./upload/Config_"$WRT_CONFIG"_"$WRT_VER"_"$WRT_DATE".txt
+          cp -f ./.config ./upload/Config-"$WRT_CONFIG"-"$WRT_INFO"-"$WRT_DATE".txt
 
           if [[ $WRT_TEST != 'true' ]]; then
             echo "WRT_KVER=$(find ./bin/targets/ -type f -name "*.manifest" -exec grep -oP '^kernel - \K[\d\.]+' {} \;)" >> $GITHUB_ENV
@@ -226,7 +231,7 @@ jobs:
             for FILE in $(find ./bin/targets/ -type f -iname "*$WRT_TARGET*") ; do
               EXT=$(basename $FILE | cut -d '.' -f 2-)
               NAME=$(basename $FILE | cut -d '.' -f 1 | grep -io "\($WRT_TARGET\).*")
-              NEW_FILE="$WRT_VER"_"$NAME"_"$WRT_DATE"."$EXT"
+              NEW_FILE="$WRT_INFO"-"$NAME"-"$WRT_DATE"."$EXT"
               mv -f $FILE ./upload/$NEW_FILE
             done
 
@@ -235,35 +240,30 @@ jobs:
             make clean -j$(nproc)
           fi
 
-      - name: Release Information
-        run: |
-          cd ./wrt/ && touch ./release.txt
-
-          echo -e "这是个平台固件包，内含多个设备！" >> ./release.txt
-          echo -e "请注意选择你需要的设备固件！" >> ./release.txt
-          echo -e "不要问，刷就完事了！" >> ./release.txt
-          echo -e "" >> ./release.txt
-          echo -e "全系带开源硬件加速，别问了！" >> ./release.txt
-          echo -e "" >> ./release.txt
-          echo -e "源码：$WRT_REPO" >> ./release.txt
-          echo -e "分支：$WRT_BRANCH" >> ./release.txt
-          echo -e "提交：$WRT_HASH" >> ./release.txt
-          echo -e "" >> ./release.txt
-          echo -e "配置：$WRT_CONFIG" >> ./release.txt
-          echo -e "平台：$WRT_TARGET" >> ./release.txt
-          echo -e "" >> ./release.txt
-          echo -e "登录地址：$WRT_IP" >> ./release.txt
-          echo -e "登录密码：$WRT_PW" >> ./release.txt
-          echo -e "" >> ./release.txt
-          echo -e "WIFI名称：$WRT_SSID" >> ./release.txt
-          echo -e "WIFI密码：$WRT_WORD" >> ./release.txt
-          echo -e "" >> ./release.txt
-          echo -e "内核版本：$WRT_KVER" >> ./release.txt
-          echo -e "插件列表：\n${WRT_LIST// /$'\n'}" >> ./release.txt
-
       - name: Release Firmware
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{env.WRT_CONFIG}}_${{env.WRT_VER}}_${{env.WRT_DATE}}
-          body_path: ./wrt/release.txt
+          tag_name: ${{env.WRT_CONFIG}}-${{env.WRT_INFO}}-${{env.WRT_DATE}}
           files: ./wrt/upload/*.*
+          body: |
+            这是个平台固件包，内含多个设备！
+            请注意选择你需要的设备固件！
+            不要问，刷就完事了！
+
+            全系带开源硬件加速，别问了！
+
+            源码：${{env.WRT_REPO}}
+            分支：${{env.WRT_BRANCH}}
+            提交：${{env.WRT_HASH}}
+
+            配置：${{env.WRT_CONFIG}}
+            平台：${{env.WRT_TARGET}}
+
+            登录地址：${{env.WRT_IP}}
+            登录密码：${{env.WRT_PW}}
+
+            WIFI名称：${{env.WRT_SSID}}
+            WIFI密码：${{env.WRT_WORD}}
+
+            内核版本：${{env.WRT_KVER}}
+            插件列表：${{env.WRT_LIST}}
