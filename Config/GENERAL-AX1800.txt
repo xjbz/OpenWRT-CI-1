@@ -1,7 +1,7 @@
 # BUILD
 CONFIG_DEVEL=y
 CONFIG_CCACHE=y
-## TARGET
+# TARGET
 CONFIG_TARGET_OPTIONS=y
 CONFIG_TARGET_MULTI_PROFILE=y
 CONFIG_TARGET_PER_DEVICE_ROOTFS=y
@@ -50,30 +50,40 @@ CONFIG_PACKAGE_kmod-lib-lz4=y
 CONFIG_PACKAGE_zram-swap=y
 # QCA NSS
 ## config
-CONFIG_NSS_DRV_IGS_ENABLE=y
-CONFIG_NSS_DRV_L2TP_ENABLE=y
-CONFIG_NSS_DRV_LAG_ENABLE=y
-CONFIG_NSS_DRV_MAPT_ENABLE=y
-CONFIG_NSS_DRV_PPTP_ENABLE=y
-CONFIG_NSS_DRV_PVXLAN_ENABLE=y
+#--# Enable NSS bridge acceleration used by bridge-mgr
+CONFIG_NSS_DRV_BRIDGE_ENABLE=y
+#--# Enable NSS VLAN acceleration used by vlan-mgr
+CONFIG_NSS_DRV_VLAN_ENABLE=y
+#--# Enable NSS PPPoE offload used by kmod-qca-nss-drv-pppoe
+CONFIG_NSS_DRV_PPPOE_ENABLE=y
+#--# Enable NSS traffic shaper support used by qdisc
 CONFIG_NSS_DRV_SHAPER_ENABLE=y
-CONFIG_NSS_DRV_VXLAN_ENABLE=y
-## package
-CONFIG_PACKAGE_kmod-qca-nss-drv-igs=y
-CONFIG_PACKAGE_kmod-qca-nss-drv-l2tpv2=y
-CONFIG_PACKAGE_kmod-qca-nss-drv-lag-mgr=y
-CONFIG_PACKAGE_kmod-qca-nss-drv-map-t=y
+#--# Enable NSS ingress shaping used by SQM download shaping
+CONFIG_NSS_DRV_IGS_ENABLE=y
+#--# Required by ECM fast-path for IPv6 routing
+CONFIG_NSS_DRV_IPV6_ENABLE=y
+#--# Required by ECM for virtual interface support
+CONFIG_NSS_DRV_VIRT_IF_ENABLE=y
+## qca-nss-drv package
+#--# Offloads Linux bridge (br-lan) forwarding used by LAN ports and Wi-Fi
+CONFIG_PACKAGE_kmod-qca-nss-drv-bridge-mgr=y
+#--# VLAN processing acceleration for LAN/WAN tagging and bridge integration
+CONFIG_PACKAGE_kmod-qca-nss-drv-vlan-mgr=y
+#--# PPPoE protocol acceleration for ISP WAN using PPPoE
 CONFIG_PACKAGE_kmod-qca-nss-drv-pppoe=y
-CONFIG_PACKAGE_kmod-qca-nss-drv-pptp=y
+#--# NSS-aware traffic control support required for SQM shaping
 CONFIG_PACKAGE_kmod-qca-nss-drv-qdisc=y
+#--# Ingress shaping module used for download traffic shaping
+CONFIG_PACKAGE_kmod-qca-nss-drv-igs=y
 # SQM
-## SHOULD BE DISABLED
-# CONFIG_PACKAGE_ip-full=y
-# CONFIG_PACKAGE_tc-tiny=y
-# CONFIG_PACKAGE_kmod-sched-core=y
-# CONFIG_PACKAGE_kmod-sched-cake=y
-# CONFIG_PACKAGE_luci-app-sqm=y
-# CONFIG_PACKAGE_sqm-scripts=y
+#--# IFB device used by SQM to redirect ingress traffic for shaping
+CONFIG_PACKAGE_kmod-nss-ifb=y
+#--# Base SQM framework
+CONFIG_PACKAGE_sqm-scripts=y
+#--# NSS SQM script
+CONFIG_PACKAGE_sqm-scripts-nss=y
+#--# Optional LuCI UI
+CONFIG_PACKAGE_luci-app-sqm=y
 # FIREWALL
 CONFIG_PACKAGE_firewall4=y
 # WIRELESS
