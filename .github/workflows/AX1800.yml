@@ -46,7 +46,7 @@ jobs:
       matrix:
         CONFIG: [IPQ60XX-AX1800-WIFI-YES]
         # VIKINGYFY/immortalwrt
-        SOURCE: ["${{ github.event.inputs.SOURCE_CODE_REPO || 'xjbz/immortalwrt' }}"]
+        SOURCE: ["${{ github.event.inputs.SOURCE_CODE_REPO || 'xjbz/VIKINGYFY-immortalwrt' }}"]
         BRANCH: ["${{ github.event.inputs.BRANCH || 'main' }}"]
 
     #调用公用编译核心WRT-CORE.yml
