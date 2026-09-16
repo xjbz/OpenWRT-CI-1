@@ -5,7 +5,7 @@ name: Auto-Clean
 
 on:
   schedule:
-    - cron: 0 21 * * *
+    - cron: 21 21 * * *
   #手动清理
   workflow_dispatch:
 
