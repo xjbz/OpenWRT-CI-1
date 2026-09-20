@@ -7,8 +7,6 @@ sed -i "/attendedsysupgrade/d" $(find ./feeds/luci/collections/ -type f -name "M
 #修改默认主题
 if [[ -n $WRT_THEME ]]; then
 	sed -i "s/luci-theme-bootstrap/luci-theme-$WRT_THEME/g" $(find ./feeds/luci/collections/ -type f -name "Makefile")
-	echo "CONFIG_PACKAGE_luci-theme-$WRT_THEME=y" >> ./.config
-	echo "CONFIG_PACKAGE_luci-app-$WRT_THEME-config=y" >> ./.config
 fi
 #修改immortalwrt.lan关联IP
 sed -i "s/192\.168\.[0-9]*\.[0-9]*/$WRT_IP/g" $(find ./feeds/luci/modules/luci-mod-system/ -type f -name "flash.js")

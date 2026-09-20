@@ -125,8 +125,7 @@ jobs:
       - name: Clone Code
         id: clone-code
         run: |
-          # git clone --depth=1 --single-branch --branch $WRT_BRANCH $WRT_REPO ./wrt/
-          git clone --single-branch --branch $WRT_BRANCH $WRT_REPO ./wrt/
+          git clone --depth=1 --single-branch --branch $WRT_BRANCH $WRT_REPO ./wrt/
 
           cd ./wrt/
           WRT_HASH=$(git rev-parse HEAD)
@@ -175,7 +174,7 @@ jobs:
 
       - name: Custom Packages
         run: |
-          cd ./wrt/
+          cd ./wrt/package/
 
           $GITHUB_WORKSPACE/Scripts/Packages.sh
           $GITHUB_WORKSPACE/Scripts/Handles.sh
@@ -200,9 +199,7 @@ jobs:
         run: |
           cd ./wrt/
 
-          # make download -j$(nproc)
-          # make download -j$(nproc) || make -j1 V=sc
-          make download -j1 V=sc
+          make download -j$(nproc)
 
       - name: Compile Firmware
         if: ${{ !inputs.WRT_TEST }}
