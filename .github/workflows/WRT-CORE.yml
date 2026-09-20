@@ -44,6 +44,12 @@ on:
         required: false
         default: false
         type: boolean
+      WRT_PKG_FILE_NAME:
+        required: false
+        type: string
+      WRT_COMMIT:
+        required: false
+        type: string
 
 env:
   GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
